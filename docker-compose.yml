@@ -1,0 +1,165 @@
+version: "3.8"
+
+services:
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    ports:
+      - "4001:3001"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=mongodb+srv://devanshbhawsar85:${MONGO_PASSWORD}@notification.vaclt.mongodb.net/
+    depends_on:
+      - mongodb
+      - rabbitmq
+      - redis
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "4002:3002"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=mongodb+srv://devanshbhawsar85:${MONGO_PASSWORD}@notification.vaclt.mongodb.net/
+    depends_on:
+      - mongodb
+      - rabbitmq
+      - redis
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  scheduler-service:
+    build: ./scheduler-service
+    container_name: scheduler-service
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=mongodb+srv://devanshbhawsar85:${MONGO_PASSWORD}@notification.vaclt.mongodb.net/scheduler-service
+    depends_on:
+      - mongodb
+      - rabbitmq
+      - redis
+    restart: unless-stopped
+    networks:
+      - app-network
+    volumes:
+      - ./logs:/app/logs # Log storage
+
+  recommendation-service:
+    build: ./recommendation-service
+    container_name: recommendation-service
+    ports:
+      - "4003:3003"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=mongodb+srv://devanshbhawsar85:${MONGO_PASSWORD}@notification.vaclt.mongodb.net/recommendation-service
+    depends_on:
+      - mongodb
+      - rabbitmq
+      - redis
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  graphql-gateway:
+    build: ./graphql-gateway
+    container_name: graphql-gateway
+    ports:
+      - "5000:4000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=mongodb+srv://devanshbhawsar85:${MONGO_PASSWORD}@notification.vaclt.mongodb.net/
+    depends_on:
+      - mongodb
+      - rabbitmq
+      - redis
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+      - "15692:15692"
+    env_file:
+      - .env
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq-enabled-plugins:/etc/rabbitmq/enabled_plugins
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - rabbitmq
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  mongodb_data:
+  rabbitmq_data:
+  redis_data:
+  grafana-storage:
+
+networks:
+  app-network:
+    driver: bridge

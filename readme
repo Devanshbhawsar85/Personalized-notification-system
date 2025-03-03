@@ -1,0 +1,126 @@
+Microservices Architecture with GraphQL, RabbitMQ, Redis, and MongoDB
+Overview
+A microservices-based system leveraging GraphQL as an API gateway, RabbitMQ for event-driven communication, Redis for caching, and MongoDB for data persistence. It handles user management, notifications, recommendations, and scheduled tasks efficiently.
+
+# GraphQL Gateway
+
+Role: Acts as a centralized API gateway, aggregating data from different services.
+Features:
+
+Single entry point for all client requests.
+Authentication & Authorization handling.
+Caching with Redis for frequently accessed data.
+Request routing to respective microservices.
+Endpoints:
+
+Queries: getUser, getUsers, getUserNotifications, getUserRecommendations etc .
+Mutations: registerUser, login, updateUserPreferences etc .
+
+# User Service
+
+Role: Manages user authentication, registration, and preferences.
+Features:
+
+JWT-based authentication.
+MongoDB storage for user profiles.
+Event-driven communication via RabbitMQ.
+Redis caching for user data.
+Endpoints:
+
+POST /register – Register a new user
+POST /login – Authenticate user & return JWT
+GET /users – Fetch all registered users
+PUT /user/:userId/preferences – Update user preferences
+
+# Notification Service
+
+Role: Handles notifications and message delivery.
+Features:
+
+Consumes events from RabbitMQ for async notifications.
+Stores notifications in MongoDB.
+Implements a Dead Letter Queue (DLQ) for failed messages.
+Endpoints:
+
+GET /notifications/unread/:userId – Fetch unread notifications
+PUT /notifications/read/:id – Mark notification as read
+GET /monitoring/failed-messages – Fetch failed messages from DLQ
+
+# Recommendation Service
+
+Role: Generates personalized recommendations.
+Features:
+
+Analyzes user activity (purchases & browsing history).
+Stores activity & recommendations in MongoDB.
+Publishes new recommendations to RabbitMQ.
+Endpoints:
+
+GET /recommendations/:userId – Fetch user recommendations
+POST /users/:userId/purchase – Log a user purchase
+POST /users/:userId/browse – Log browsing activity
+
+# Scheduler Service
+
+Role: Manages scheduled tasks like notifications & order updates.
+Features:
+
+Uses node-cron for periodic task execution.
+Fetches data from GraphQL Gateway.
+Publishes messages to RabbitMQ for notifications.
+Implements retry logic & DLQ for failed tasks.
+Tasks:
+
+Order Status Updates: Sent daily at 9 AM UTC
+Promotional Notifications: Sent every Friday at noon UTC
+
+# RabbitMQ (Message Broker)
+
+Role: Enables event-driven communication between services.
+Features:
+
+Ensures asynchronous messaging between microservices.
+Implements Dead Letter Queues (DLQ) for failed messages.
+Supports retries for failed tasks.
+Exchanges & Queues:
+
+Exchanges: user-events, dead-letter-exchange
+Queues: recommendations, order_updates_queue, failed-messages
+
+# Redis (Caching Layer)
+
+Role: Improves performance by caching frequently accessed data.
+Features:
+
+Reduces backend load & response time.
+Caches user data in GraphQL Gateway.
+Caches recommendations to enhance speed.
+Implements TTL (Time-To-Live) for automatic cache expiration.
+
+# MongoDB (Persistent Storage)
+
+Role: Stores user-related data permanently.
+Features:
+
+Scalable, NoSQL database for microservices.
+High availability & horizontal scalability.
+Stores user profiles, notifications, and recommendations.
+Collections:
+
+users – Stores user profiles & preferences
+notifications – Stores notification history
+recommendations – Stores user-specific recommendations
+
+# Monitoring (Prometheus Metrics)
+
+Role: Tracks system health & service performance.
+Features:
+
+Monitors RabbitMQ message processing & queue depth.
+Tracks error rates & request latency.
+Provides dashboards for real-time monitoring.
+Key Metrics:
+
+Message processing counters
+Queue depth gauges
+Error tracking & RabbitMQ connection monitoring

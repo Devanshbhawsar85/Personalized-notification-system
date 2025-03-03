@@ -1,0 +1,264 @@
+# User Queries
+
+# Get a specific user by ID
+query GetUser {
+  getUser(id: "user123456") {
+    id
+    name
+    email
+    preferences {
+      promotions
+      order_updates
+      recommendations
+    }
+  }
+}
+
+# Get all users
+query GetAllUsers {
+  getUsers {
+    id
+    name
+    email
+  }
+}
+
+# Get user with all related data
+query GetUserWithAllData {
+  getUser(id: "user12356") {
+    id
+    name
+    email
+    preferences {
+      promotions
+      order_updates
+      recommendations
+    }
+    notifications {
+      id
+      type
+      content
+      sentAt
+      read
+    }
+    recommendations
+    browsingActivity {
+      productId
+      timestamp
+    }
+    purchaseHistory {
+      productId
+      timestamp
+    }
+  }
+}
+
+# Notification Queries
+
+# Get user notifications
+query GetUserNotifications {
+  getUserNotifications(userId: "user123", unreadOnly: false) {
+    id
+    type
+    content
+    sentAt
+    read
+  }
+}
+
+# Get a specific notification
+query GetNotification {
+  getNotification(id: "notif456") {
+    id
+    userId
+    type
+    content
+    sentAt
+    read
+  }
+}
+
+# Recommendation Queries
+
+# Get user recommendations
+query GetUserRecommendations {
+  getUserRecommendations(userId: "user123") {
+    userId
+    recommendations
+  }
+}
+
+# User Activity Queries
+
+# Get user browsing activity
+query GetUserBrowsingActivity {
+  getUserBrowsingActivity(userId: "user123") {
+    productId
+    timestamp
+  }
+}
+
+# Get user purchase history
+query GetUserPurchaseHistory {
+  getUserPurchaseHistory(userId: "user123") {
+    productId
+    timestamp
+  }
+}
+
+# System Monitoring Queries
+
+# Get dead letter queue statistics
+query GetDLQStats {
+  getDLQStats {
+    messageCount
+    consumerCount
+    lastChecked
+  }
+}
+
+# Get service health status
+query GetServiceHealth {
+  getServiceHealth {
+    status
+    details {
+      rabbitmq
+    }
+  }
+}
+
+# Get failed messages
+query GetFailedMessages {
+  getFailedMessages {
+    queueDepth
+    consumerCount
+    sampleMessages {
+      original
+      meta {
+        reason
+        timestamp
+        originalQueue
+        headers
+      }
+    }
+  }
+}
+
+# Get queue statistics
+query GetQueueStats {
+  getQueueStats {
+    queues
+    timestamp
+  }
+}
+
+# Authentication and User Management Mutations
+
+# Register a new user
+mutation RegisterUser {
+  registerUser(
+    name: "devasnh bhawsar", 
+    email: "devansh@example.com", 
+    password: "securepassword",
+    preferences: {
+      promotions: true,
+      order_updates: true,
+      recommendations: true
+    }
+  ) {
+    id
+    name
+    email
+    preferences {
+      promotions
+      order_updates
+      recommendations
+    }
+  }
+}
+
+# Login user
+mutation Login {
+  login(
+    email: "devansh@example.com", 
+    password: "securepassword"
+  ) {
+    token
+    userId
+  }
+}
+
+# Update user preferences
+mutation UpdateUserPreferences {
+  updateUserPreferences(
+    userId: "user123", 
+    preferences: {
+      promotions: false,
+      order_updates: true,
+      recommendations: true
+    }
+  ) {
+    id
+    preferences {
+      promotions
+      order_updates
+      recommendations
+    }
+  }
+}
+
+# Notification Mutations
+
+# Mark notification as read
+mutation MarkNotificationAsRead {
+  markNotificationAsRead(notificationId: "notif456") {
+    id
+    type
+    content
+    sentAt
+    read
+  }
+}
+
+# User Activity Mutations
+
+# Add purchase to user history
+mutation AddPurchase {
+  addPurchase(
+    userId: "user123", 
+    productId: "product789"
+  ) {
+    id
+    name
+    purchaseHistory {
+      productId
+      timestamp
+    }
+  }
+}
+
+# Add browsing activity
+mutation AddBrowsingActivity {
+  addBrowsingActivity(
+    userId: "user123", 
+    productId: "product789"
+  ) {
+    id
+    name
+    browsingActivity {
+      productId
+      timestamp
+    }
+  }
+}
+
+# System Administration Mutations
+
+# Process dead letter queue
+mutation ProcessDLQ {
+  processDLQ(limit: 20) {
+    success
+    message
+    error
+  }
+}
