@@ -2,6 +2,8 @@
 
 This service handles scheduled tasks like order updates and promotional notifications, integrating with RabbitMQ, MongoDB, and GraphQL.
 
+## In order to test scheduler service i have set cron for 10 seconds for recommedation and promotions services so after each 10 seconds you will see new notifications due to these crons
+
 ## Main Functions
 
 ### Scheduled Tasks

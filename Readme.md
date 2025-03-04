@@ -140,3 +140,5 @@ To also remove volumes (this will delete all data):
 ```bash
 docker-compose down -v
 ```
+
+## In order to test scheduler service i have set cron for 10 seconds for recommedation and promotions services so after each 10 seconds you will see new notifications due to these crons
