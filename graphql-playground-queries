@@ -158,8 +158,15 @@ query GetQueueStats {
 
 
 # Authentication and User Management Mutations
-Note- you need to set Authentication header in graph ql for the mutatations  except for registeruser   , one can get Authentication key when the user login after registering himself
+Note- you need to set Authorization header in graph ql for the mutatations  except for registeruser   , one can get Authorization token key when the user login after registering himself
 
+
+
+put Authorization token in header in this format 
+
+key               value
+Authorization -  Bearer <put token here> 
+Note - token should not be in inverted commas and B of bearer keep capital
 
 # Register a new user
 mutation RegisterUser {
