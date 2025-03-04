@@ -58,7 +58,7 @@ query GetUserWithAllData {
 
 # Notification Queries
 
-# Get user notifications
+# Get all notifications of a user
 query GetUserNotifications {
   getUserNotifications(userId: "user123", unreadOnly: false) {
     id

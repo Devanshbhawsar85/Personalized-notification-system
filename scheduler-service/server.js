@@ -101,9 +101,8 @@ app.get("/health", (req, res) => {
 });
 
 const MONGODB_URI = process.env.MONGODB_URI;
-const GRAPHQL_ENDPOINT =
-  process.env.GRAPHQL_ENDPOINT || "http://localhost:4000/graphql";
-const RABBITMQ_URL = process.env.RABBITMQ_URL || "amqp://localhost";
+const GRAPHQL_ENDPOINT = "http://graphql-gateway:4000/graphql";
+const RABBITMQ_URL = process.env.RABBITMQ_URL || "amqp://guest:guest@rabbitmq";
 const MAX_RETRY_COUNT = 3; // Maximum number of delivery attempts before sending to DLQ
 
 // Connected to order-specific database
@@ -545,30 +544,29 @@ const setupQueueMonitoring = () => {
   });
 };
 
-// Schedule tasks
 const setupScheduler = () => {
-  // Order status updates daily at 9 AM UTC
+  // Order status updates every 10 seconds
   cron.schedule(
-    "0 9 * * *",
+    "*/10 * * * * *",
     () => {
       console.log("Running scheduled task: Order status updates");
       sendOrderStatusUpdates().catch((err) => {
         console.error("Scheduled order updates failed:", err);
       });
     },
-    { timezone: "UTC" }
+    { timezone: "UTC", seconds: true }
   );
 
-  // Promotional notifications every Friday at noon UTC
+  // Promotional notifications every 10 seconds
   cron.schedule(
-    "0 12 * * 5",
+    "*/10 * * * * *",
     () => {
       console.log("Running scheduled task: Promotional notifications");
       sendPromotionalNotifications().catch((err) => {
         console.error("Scheduled promotional notifications failed:", err);
       });
     },
-    { timezone: "UTC" }
+    { timezone: "UTC", seconds: true }
   );
 
   console.log("Scheduler started and tasks configured");
