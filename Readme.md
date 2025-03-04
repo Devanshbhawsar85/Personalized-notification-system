@@ -88,21 +88,22 @@ docker-compose ps
 
 ### Service Structure
 
-Each service follows a similar structure:
+Each service follows a similar structure.
 
-````
+---
 
-
-# Building Individual Services
+## Building Individual Services
 
 To rebuild a specific service:
 
-
+```bash
 docker-compose build service-name
 docker-compose up -d service-name
+```
 
+---
 
-### Viewing Logs
+## Viewing Logs
 
 View logs for all services:
 
@@ -116,18 +117,22 @@ Or for a specific service:
 docker-compose logs -f service-name
 ```
 
+---
+
 ## Monitoring
 
 ### Prometheus
 
-Access Prometheus at http://localhost:9090 to view metrics.
+Access Prometheus at [http://localhost:9090](http://localhost:9090) to view metrics.
 
 ### Grafana
 
-1. Access Grafana at http://localhost:3000
+1. Access Grafana at [http://localhost:3000](http://localhost:3000)
 2. Log in with the credentials specified in your `.env` file
-3. Add Prometheus as a data source (URL: http://prometheus:9090)
+3. Add Prometheus as a data source (URL: `http://prometheus:9090`)
 4. Import dashboards for RabbitMQ and application metrics
+
+---
 
 ## Common Operations
 
@@ -151,9 +156,8 @@ docker-compose restart service-name
 docker-compose down
 ```
 
-To also remove volumes (will delete all data):
+To also remove volumes (this will delete all data):
 
 ```bash
 docker-compose down -v
 ```
-````
