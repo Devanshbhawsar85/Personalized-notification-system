@@ -108,10 +108,10 @@ Each service follows a similar structure:
 
 To rebuild a specific service:
 
-```bash
+
 docker-compose build service-name
 docker-compose up -d service-name
-````
+
 
 ### Viewing Logs
 
@@ -167,3 +167,4 @@ To also remove volumes (will delete all data):
 ```bash
 docker-compose down -v
 ```
+````
