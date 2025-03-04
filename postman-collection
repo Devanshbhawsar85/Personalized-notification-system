@@ -1,0 +1,179 @@
+{
+  "info": {
+    "name": "Notification Service API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication & User Management",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation RegisterUser($name: String!, $email: String!, $password: String!, $preferences: PreferenceInput!) {\n  registerUser(name: $name, email: $email, password: $password, preferences: $preferences) {\n    id\n    name\n    email\n    preferences {\n      promotions\n      order_updates\n      recommendations\n    }\n  }\n}",
+                "variables": {
+                  "name": "Devansh Bhawsar",
+                  "email": "devansh@example.com",
+                  "password": "securepassword",
+                  "preferences": {
+                    "promotions": true,
+                    "order_updates": true,
+                    "recommendations": true
+                  }
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{EC2_IP}}:5000/graphql",
+              "host": [
+                "{{EC2_IP}}"
+              ],
+              "port": "5000",
+              "path": [
+                "graphql"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation Login($email: String!, $password: String!) {\n  login(email: $email, password: $password) {\n    token\n    userId\n  }\n}",
+                "variables": {
+                  "email": "devansh@example.com",
+                  "password": "securepassword"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{EC2_IP}}:5000/graphql",
+              "host": [
+                "{{EC2_IP}}"
+              ],
+              "port": "5000",
+              "path": [
+                "graphql"
+              ]
+            },
+            "postscript": [
+              "pm.test(\"Save token\", function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.collectionVariables.set(\"auth_token\", jsonData.data.login.token);",
+              "    pm.collectionVariables.set(\"current_user_id\", jsonData.data.login.userId);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Queries",
+      "item": [
+        {
+          "name": "Get User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetUser($id: ID!) {\n  getUser(id: $id) {\n    id\n    name\n    email\n    preferences {\n      promotions\n      order_updates\n      recommendations\n    }\n  }\n}",
+                "variables": {
+                  "id": "{{current_user_id}}"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{EC2_IP}}:5000/graphql",
+              "host": [
+                "{{EC2_IP}}"
+              ],
+              "port": "5000",
+              "path": [
+                "graphql"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query GetAllUsers {\n  getUsers {\n    id\n    name\n    email\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "http://{{EC2_IP}}:5000/graphql",
+              "host": [
+                "{{EC2_IP}}"
+              ],
+              "port": "5000",
+              "path": [
+                "graphql"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "EC2_IP",
+      "value": "your-ec2-public-ip",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "current_user_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

@@ -1,5 +1,8 @@
 # User Queries
 
+
+## Note to get user id you need to query GetUsers and from there you can extract user id for a user  and if getuser is empty then first register yourself setpreferences and login to get Authentication header then you can get set attributes for a user   
+
 # Get a specific user by ID
 query GetUser {
   getUser(id: "user123456") {
@@ -152,7 +155,11 @@ query GetQueueStats {
   }
 }
 
+
+
 # Authentication and User Management Mutations
+Note- you need to set Authentication header in graph ql for the mutatations  except for registeruser   , one can get Authentication key when the user login after registering himself
+
 
 # Register a new user
 mutation RegisterUser {
@@ -209,7 +216,10 @@ mutation UpdateUserPreferences {
 
 # Notification Mutations
 
+Note - you need notificaiton id to mark it as read or unread which you can get by querying your notifications ... for every notificatin the first id is notification id and 2nd id is user id  
+
 # Mark notification as read
+
 mutation MarkNotificationAsRead {
   markNotificationAsRead(notificationId: "notif456") {
     id
