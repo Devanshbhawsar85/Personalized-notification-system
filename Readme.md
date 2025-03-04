@@ -69,31 +69,20 @@ To check the status of all services:
 docker-compose ps
 ```
 
-### Service Endpoints
+## Service Endpoints
 
-| Service | URL | Description |
-
-### GraphQL Gateway | http://localhost:5000 | GraphQL API endpoint
-
-# User Service | http://localhost:4001 | User management API
-
-# Notification Service | http://localhost:4002 | Notification management API
-
-# Recommendation Service | http://localhost:4003 | Recommendation API
-
-# GraphQL Gateway | http://localhost:5000 | GraphQL API endpoint
-
-# MongoDB | localhost:27017 | Database |
-
-# RabbitMQ Management | http://localhost:15672 | Message broker management
-
-# RabbitMQ Metrics | http://localhost:15692 | RabbitMQ Prometheus metrics
-
-# Redis | localhost:6379 | Cache server
-
-# Prometheus | http://localhost:9090 | Metrics collection
-
-# Grafana | http://localhost:3000 | Monitoring dashboards
+| Service                    | URL                    | Description                 |
+| -------------------------- | ---------------------- | --------------------------- |
+| **GraphQL Gateway**        | http://localhost:5000  | GraphQL API endpoint        |
+| **User Service**           | http://localhost:4001  | User management API         |
+| **Notification Service**   | http://localhost:4002  | Notification management API |
+| **Recommendation Service** | http://localhost:4003  | Recommendation API          |
+| **MongoDB**                | localhost:27017        | Database                    |
+| **RabbitMQ Management**    | http://localhost:15672 | Message broker management   |
+| **RabbitMQ Metrics**       | http://localhost:15692 | RabbitMQ Prometheus metrics |
+| **Redis**                  | localhost:6379         | Cache server                |
+| **Prometheus**             | http://localhost:9090  | Metrics collection          |
+| **Grafana**                | http://localhost:3000  | Monitoring dashboards       |
 
 ## Development
 
