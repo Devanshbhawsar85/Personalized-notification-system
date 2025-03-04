@@ -34,27 +34,6 @@ git clone https://github.com/Devanshbhawsar85/Personalized-notification-system
 cd Personalized-notification-system
 ```
 
-### Environment Setup
-
-Create a `.env` file in the root directory:
-
-```
-
-
-MONGO_PASSWORD=Ujjain@123
-RABBITMQ_URL=amqp://guest:guest@rabbitmq
-REDIS_URL=redis://redis:6379
-SECRET_KEY=3d16d4ee8571ace0776905e4fbad4bd4fd6ab63fc3f4dedf9c2b7f43eccda535ffdc902fbe7b3c09970a70329517090deab106d814e2a57d6548889793e23937
-
-rabbitMQ
-GF_SECURITY_ADMIN_USER=admin
-GF_SECURITY_ADMIN_PASSWORD=admin
-
-grafan
-RABBITMQ_DEFAULT_USER=guest
-RABBITMQ_DEFAULT_PASS=guest
-```
-
 ### Starting the Services
 
 Deploy all services with a single command:
@@ -71,18 +50,18 @@ docker-compose ps
 
 ## Service Endpoints
 
-| Service                    | URL                    | Description                 |
-| -------------------------- | ---------------------- | --------------------------- |
-| **GraphQL Gateway**        | http://localhost:5000  | GraphQL API endpoint        |
-| **User Service**           | http://localhost:4001  | User management API         |
-| **Notification Service**   | http://localhost:4002  | Notification management API |
-| **Recommendation Service** | http://localhost:4003  | Recommendation API          |
-| **MongoDB**                | localhost:27017        | Database                    |
-| **RabbitMQ Management**    | http://localhost:15672 | Message broker management   |
-| **RabbitMQ Metrics**       | http://localhost:15692 | RabbitMQ Prometheus metrics |
-| **Redis**                  | localhost:6379         | Cache server                |
-| **Prometheus**             | http://localhost:9090  | Metrics collection          |
-| **Grafana**                | http://localhost:3000  | Monitoring dashboards       |
+| Service                    | URL                           | Description                 |
+| -------------------------- | ----------------------------- | --------------------------- |
+| **GraphQL Gateway**        | http://localhost:5000/graphql | GraphQL API endpoint        |
+| **User Service**           | http://localhost:4001         | User management API         |
+| **Notification Service**   | http://localhost:4002         | Notification management API |
+| **Recommendation Service** | http://localhost:4003         | Recommendation API          |
+| **MongoDB**                | localhost:27017               | Database                    |
+| **RabbitMQ Management**    | http://localhost:15672        | Message broker management   |
+| **RabbitMQ Metrics**       | http://localhost:15692        | RabbitMQ Prometheus metrics |
+| **Redis**                  | localhost:6379                | Cache server                |
+| **Prometheus**             | http://localhost:9090         | Metrics collection          |
+| **Grafana**                | http://localhost:3000         | Monitoring dashboards       |
 
 ## Development
 
