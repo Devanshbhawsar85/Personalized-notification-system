@@ -27,11 +27,3 @@ This service generates recommendations for users based on their browsing and pur
 
 - Metrics: Exposes Prometheus metrics for RabbitMQ, operations, and message processing.
 - Health Check: Includes RabbitMQ and queue status.
-
-# Setup
-
-1. Install dependencies: `npm install`
-2. Set environment variables in `.env`:
-   - `MONGODB_URI`
-   - `RABBITMQ_URL`
-3. Start the server: `node server.js`

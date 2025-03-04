@@ -54,24 +54,3 @@ Authentication & User Management
 ## System Administration Mutations
 
 1. processDLQ – Process and retry messages from the Dead Letter Queue.
-
-Quick Setup
-Clone the Repository:
-
-#bash
-
-# git clone <repository-url>
-
-cd <repository-folder>
-Install Dependencies:
-
-# npm install
-
-Set Up Redis:
-
-# Start the Server:
-
-node server.js
-
-Access the GraphQL Playground:
-Open your browser and navigate to http://localhost:4000/graphql.
