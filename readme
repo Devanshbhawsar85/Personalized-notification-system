@@ -1,117 +1,157 @@
-Microservices Architecture with GraphQL, RabbitMQ, Redis, and MongoDB
-Overview
-A microservices-based system leveraging GraphQL as an API gateway, RabbitMQ for event-driven communication, Redis for caching, and MongoDB for data persistence. It handles user management, notifications, recommendations, and scheduled tasks efficiently.
+# Microservices Architecture
 
-# GraphQL Gateway
+A scalable microservices application with user management, notifications, scheduling, recommendations, and GraphQL API gateway.
 
-Role: Acts as a centralized API gateway, aggregating data from different services.
-Features:
+## Architecture Overview
 
-Single entry point for all client requests.
-Authentication & Authorization handling.
-Caching with Redis for frequently accessed data.
-Request routing to respective microservices.
-Endpoints:
+This project implements a modern microservices architecture with the following components:
 
-Queries: getUser, getUsers, getUserNotifications, getUserRecommendations etc .
-Mutations: registerUser, login, updateUserPreferences etc .
+- **User Service**: Handles user authentication, profiles, and management
+- **Notification Service**: Manages user notifications across multiple channels
+- **Scheduler Service**: Handles scheduled tasks and recurring jobs
+- **Recommendation Service**: Provides personalized recommendations
+- **GraphQL Gateway**: Unified API gateway for client applications
 
-# User Service
+Supporting infrastructure:
 
-Role: Manages user authentication, registration, and preferences.
-Features:
+- MongoDB for persistent data storage
+- RabbitMQ for service communication
+- Redis for caching and session management
+- Prometheus & Grafana for monitoring
 
-JWT-based authentication.
-MongoDB storage for user profiles.
-Event-driven communication via RabbitMQ.
-Redis caching for user data.
-Endpoints:
+## Prerequisites
 
-POST /register – Register a new user
-POST /login – Authenticate user & return JWT
-GET /users – Fetch all registered users
-PUT /user/:userId/preferences – Update user preferences
+- Docker and Docker Compose
+- Git
+- Node.js (for local development)
 
-# Notification Service
+## Getting Started
 
-Role: Handles notifications and message delivery.
-Features:
+### Clone the Repository
 
-Consumes events from RabbitMQ for async notifications.
-Stores notifications in MongoDB.
-Implements a Dead Letter Queue (DLQ) for failed messages.
-Endpoints:
+```bash
+git clone https://github.com/Devanshbhawsar85/Personalized-notification-system
+cd Personalized-notification-system
+```
 
-GET /notifications/unread/:userId – Fetch unread notifications
-PUT /notifications/read/:id – Mark notification as read
-GET /monitoring/failed-messages – Fetch failed messages from DLQ
+### Environment Setup
 
-# Recommendation Service
+Create a `.env` file in the root directory:
 
-Role: Generates personalized recommendations.
-Features:
+```
 
-Analyzes user activity (purchases & browsing history).
-Stores activity & recommendations in MongoDB.
-Publishes new recommendations to RabbitMQ.
-Endpoints:
 
-GET /recommendations/:userId – Fetch user recommendations
-POST /users/:userId/purchase – Log a user purchase
-POST /users/:userId/browse – Log browsing activity
+MONGO_PASSWORD=Ujjain@123
+RABBITMQ_URL=amqp://guest:guest@rabbitmq
+REDIS_URL=redis://redis:6379
+SECRET_KEY=3d16d4ee8571ace0776905e4fbad4bd4fd6ab63fc3f4dedf9c2b7f43eccda535ffdc902fbe7b3c09970a70329517090deab106d814e2a57d6548889793e23937
 
-# Scheduler Service
+rabbitMQ
+GF_SECURITY_ADMIN_USER=admin
+GF_SECURITY_ADMIN_PASSWORD=admin
 
-Role: Manages scheduled tasks like notifications & order updates.
-Features:
+grafan
+RABBITMQ_DEFAULT_USER=guest
+RABBITMQ_DEFAULT_PASS=guest
+```
 
-Uses node-cron for periodic task execution.
-Fetches data from GraphQL Gateway.
-Publishes messages to RabbitMQ for notifications.
-Implements retry logic & DLQ for failed tasks.
-Tasks:
+### Starting the Services
 
-Order Status Updates: Sent daily at 9 AM UTC
-Promotional Notifications: Sent every Friday at noon UTC
+Deploy all services with a single command:
 
-# RabbitMQ (Message Broker)
+```bash
+docker-compose up -d
+```
 
-Role: Enables event-driven communication between services.
-Features:
+To check the status of all services:
 
-Ensures asynchronous messaging between microservices.
-Implements Dead Letter Queues (DLQ) for failed messages.
-Supports retries for failed tasks.
-Exchanges & Queues:
+```bash
+docker-compose ps
+```
 
-Exchanges: user-events, dead-letter-exchange
-Queues: recommendations, order_updates_queue, failed-messages
+### Service Endpoints
 
-# Redis (Caching Layer)
+| Service | URL | Description |
+| User Service | http://localhost:4001 | User management API |
+| Notification Service | http://localhost:4002 | Notification management API |
+| Recommendation Service | http://localhost:4003 | Recommendation API |
+| GraphQL Gateway | http://localhost:5000 | GraphQL API endpoint |
+| MongoDB | localhost:27017 | Database |
+| RabbitMQ Management | http://localhost:15672 | Message broker management |
+| RabbitMQ Metrics | http://localhost:15692 | RabbitMQ Prometheus metrics |
+| Redis | localhost:6379 | Cache server |
+| Prometheus | http://localhost:9090 | Metrics collection |
+| Grafana | http://localhost:3000 | Monitoring dashboards |
 
-Role: Improves performance by caching frequently accessed data.
-Features:
+## Development
 
-Reduces backend load & response time.
-Caches user data in GraphQL Gateway.
-Caches recommendations to enhance speed.
-Implements TTL (Time-To-Live) for automatic cache expiration.
+### Service Structure
 
-# MongoDB (Persistent Storage)
+Each service follows a similar structure:
 
-users – Stores user profiles & preferences
-notifications – Stores notification history
-recommendations – Stores user-specific recommendations
+````
 
-# Monitoring (Prometheus Metrics)
 
-Role: Tracks system health & service performance.
-Features:
-Monitors RabbitMQ message processing & queue depth.
-Tracks error rates & request latency.
-Provides dashboards for real-time monitoring.
-Key Metrics:
+# Building Individual Services
 
-Message processing counters
-Queue depth gauges
-Error tracking & RabbitMQ connection monitoring
+To rebuild a specific service:
+
+```bash
+docker-compose build service-name
+docker-compose up -d service-name
+````
+
+### Viewing Logs
+
+View logs for all services:
+
+```bash
+docker-compose logs -f
+```
+
+Or for a specific service:
+
+```bash
+docker-compose logs -f service-name
+```
+
+## Monitoring
+
+### Prometheus
+
+Access Prometheus at http://localhost:9090 to view metrics.
+
+### Grafana
+
+1. Access Grafana at http://localhost:3000
+2. Log in with the credentials specified in your `.env` file
+3. Add Prometheus as a data source (URL: http://prometheus:9090)
+4. Import dashboards for RabbitMQ and application metrics
+
+## Common Operations
+
+### Scaling Services
+
+To scale a service:
+
+```bash
+docker-compose up -d --scale service-name=3
+```
+
+### Restarting Services
+
+```bash
+docker-compose restart service-name
+```
+
+### Stopping the Application
+
+```bash
+docker-compose down
+```
+
+To also remove volumes (will delete all data):
+
+```bash
+docker-compose down -v
+```
