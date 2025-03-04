@@ -99,14 +99,6 @@ Implements TTL (Time-To-Live) for automatic cache expiration.
 
 # MongoDB (Persistent Storage)
 
-Role: Stores user-related data permanently.
-Features:
-
-Scalable, NoSQL database for microservices.
-High availability & horizontal scalability.
-Stores user profiles, notifications, and recommendations.
-Collections:
-
 users – Stores user profiles & preferences
 notifications – Stores notification history
 recommendations – Stores user-specific recommendations
@@ -115,7 +107,6 @@ recommendations – Stores user-specific recommendations
 
 Role: Tracks system health & service performance.
 Features:
-
 Monitors RabbitMQ message processing & queue depth.
 Tracks error rates & request latency.
 Provides dashboards for real-time monitoring.

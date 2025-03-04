@@ -10,10 +10,10 @@ require("dotenv").config();
 const app = express();
 const PORT = 3004; // Assuming port 3004 for scheduler service
 
-// Create metric registry
+//metric registry
 const register = new promClient.Registry();
 
-// Configure metrics middleware
+// metrics middleware
 const metricsMiddleware = promBundle({
   includeMethod: true,
   includePath: true,
@@ -25,7 +25,7 @@ const metricsMiddleware = promBundle({
 app.use(metricsMiddleware);
 app.use(express.json());
 
-// Create custom metrics
+//custom metrics
 const messagePublishCounter = new promClient.Counter({
   name: "scheduler_service_rabbitmq_messages_published_total",
   help: "Total number of messages published to RabbitMQ",
@@ -70,7 +70,7 @@ const graphqlRequestCounter = new promClient.Counter({
   registers: [register],
 });
 
-// Add queue monitoring metrics
+// queue monitoring metrics
 const queueDepthGauge = new promClient.Gauge({
   name: "scheduler_service_rabbitmq_queue_depth",
   help: "Current number of messages in RabbitMQ queues",
@@ -106,7 +106,7 @@ const GRAPHQL_ENDPOINT =
 const RABBITMQ_URL = process.env.RABBITMQ_URL || "amqp://localhost";
 const MAX_RETRY_COUNT = 3; // Maximum number of delivery attempts before sending to DLQ
 
-// Connect to order-specific database
+// Connected to order-specific database
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
@@ -416,7 +416,7 @@ const sendOrderStatusUpdates = async () => {
       status: "failed",
     });
   } finally {
-    taskTimer(); // End the timer
+    taskTimer();
   }
 };
 
@@ -489,7 +489,6 @@ const sendPromotionalNotifications = async () => {
   }
 };
 
-// Function to check RabbitMQ queue depths for monitoring
 const monitorQueueDepths = async () => {
   let connection;
   let channel;
@@ -508,10 +507,8 @@ const monitorQueueDepths = async () => {
 
     for (const queue of queues) {
       try {
-        // Assert the queue to make sure it exists
         const queueInfo = await channel.assertQueue(queue, { durable: true });
 
-        // Get message count and update gauge
         queueDepthGauge.set({ queue }, queueInfo.messageCount);
 
         console.log(`Queue ${queue} depth: ${queueInfo.messageCount} messages`);
@@ -533,7 +530,7 @@ const monitorQueueDepths = async () => {
   }
 };
 
-// Set up queue monitoring schedule
+// queue monitoring schedule
 const setupQueueMonitoring = () => {
   // Monitor queues every 5 minutes
   cron.schedule("*/5 * * * *", () => {
@@ -543,7 +540,6 @@ const setupQueueMonitoring = () => {
     });
   });
 
-  // Run initial check
   monitorQueueDepths().catch((err) => {
     console.error("Initial queue monitoring failed:", err);
   });
@@ -578,7 +574,7 @@ const setupScheduler = () => {
   console.log("Scheduler started and tasks configured");
 };
 
-// Add a new endpoint to manually retry messages from DLQ
+// new endpoint to manually retry messages from DLQ
 app.post("/retry-dlq/:queueName", async (req, res) => {
   const dlqName = req.params.queueName;
   if (!dlqName.endsWith("_dlq")) {
@@ -609,7 +605,7 @@ app.post("/retry-dlq/:queueName", async (req, res) => {
 
             // Publish back to original queue
             const originalQueue = message._meta?.originalQueue || targetQueue;
-            delete message._meta; // Remove metadata before republishing
+            delete message._meta;
 
             const publishResult = await publishToQueue(originalQueue, message);
             if (publishResult) {
@@ -631,7 +627,6 @@ app.post("/retry-dlq/:queueName", async (req, res) => {
       { noAck: false }
     );
 
-    // Wait a bit to process messages
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Cancel the consumer

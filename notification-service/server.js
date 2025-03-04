@@ -9,10 +9,9 @@ const promBundle = require("express-prom-bundle");
 
 const app = express();
 
-// Create metric registry
 const register = new promClient.Registry();
 
-// Configure metrics middleware
+// metrics middleware
 const metricsMiddleware = promBundle({
   includeMethod: true,
   includePath: true,
@@ -27,13 +26,12 @@ app.use(express.json());
 
 // RabbitMQ Config
 const RABBITMQ_URL = process.env.RABBITMQ_URL;
-// hardcoded queue names, easier to change here than env vars
+
 const QUEUES = ["recommendations", "order_updates_queue"];
 const USER_EXCHANGE = "user-events";
 const DEAD_LETTER_EXCHANGE = "dead-letter-exchange";
 const DEAD_LETTER_QUEUE = "failed-messages";
 
-// Create custom metrics
 const messageProcessCounter = new promClient.Counter({
   name: "notification_service_messages_processed_total",
   help: "Total number of messages processed",
@@ -70,7 +68,7 @@ const activeConsumersGauge = new promClient.Gauge({
   registers: [register],
 });
 
-// New metrics for queue monitoring
+//metrics for queue monitoring
 const queueDepthGauge = new promClient.Gauge({
   name: "notification_service_queue_depth",
   help: "Number of messages in the queue",
@@ -238,7 +236,7 @@ async function processMessage(msg, routingKey, channel, maxRetries = 3) {
     eventType = "unknown";
   }
 
-  // Start the timer for this message processing
+  //  timer for this message processing
   const timer = messageProcessDuration.startTimer({
     queue: queueName,
     event_type: eventType,
@@ -247,10 +245,8 @@ async function processMessage(msg, routingKey, channel, maxRetries = 3) {
   let retryCount = 0;
   let success = false;
 
-  // Get message headers or initialize empty object
   const headers = msg.properties.headers || {};
 
-  // Check if this is a retry
   if (headers.retryCount !== undefined) {
     retryCount = headers.retryCount;
   }
@@ -285,7 +281,6 @@ async function processMessage(msg, routingKey, channel, maxRetries = 3) {
         status: "unhandled",
       });
 
-      // Send to dead letter queue for unhandled events
       await sendToDeadLetterQueue(
         channel,
         msg,
@@ -293,17 +288,13 @@ async function processMessage(msg, routingKey, channel, maxRetries = 3) {
         "unhandled_event_type"
       );
 
-      // We'll consider this handled since we've properly routed it to DLQ
       success = true;
     }
 
-    // Mark as successful if we reached here
     success = true;
 
-    // End the timer
     timer();
   } catch (error) {
-    // End the timer even in case of error
     timer();
     console.error("Error processing message:", error);
     console.error(
@@ -316,9 +307,8 @@ async function processMessage(msg, routingKey, channel, maxRetries = 3) {
       status: "error",
     });
 
-    // Handle retry logic
+    // retry logic
     if (retryCount < maxRetries) {
-      // Increment retry counter in message headers
       deliveryRetryCounter.inc({
         queue: queueName,
         event_type: eventType || "unknown",
@@ -333,7 +323,6 @@ async function processMessage(msg, routingKey, channel, maxRetries = 3) {
             `Retrying message processing (attempt ${retryCount + 1})`
           );
 
-          // Publish message back to the original queue with updated retry count
           const updatedHeaders = { ...headers, retryCount: retryCount + 1 };
 
           channel.publish("", queueName, msg.content, {
@@ -342,7 +331,7 @@ async function processMessage(msg, routingKey, channel, maxRetries = 3) {
           });
         } catch (err) {
           console.error("Failed to schedule retry:", err);
-          // If retry scheduling fails, send to dead letter queue
+          // If retry scheduling fails, sending to dead letter queue
           sendToDeadLetterQueue(
             channel,
             msg,
@@ -380,7 +369,6 @@ async function sendToDeadLetterQueue(
   try {
     const queueName = originalMsg.fields.routingKey || "unknown_queue";
 
-    // Add metadata about the failure
     const deadLetterMsg = {
       original: messageContent,
       meta: {
@@ -391,13 +379,13 @@ async function sendToDeadLetterQueue(
       },
     };
 
-    // Increment dead letter counter
+    // Incrementing dead letter counter
     deadLetterQueueCounter.inc({
       source_queue: queueName,
       reason: reason,
     });
 
-    // Publish to dead letter exchange
+    // Publishing to dead letter exchange
     await channel.publish(
       DEAD_LETTER_EXCHANGE,
       "failed",
@@ -437,14 +425,12 @@ async function startConsumer() {
 
     rabbitmqConnectionCounter.inc({ status: "mq_success" });
 
-    // Setup dead letter exchange and queue
     await channel.assertExchange(DEAD_LETTER_EXCHANGE, "direct", {
       durable: true,
     });
     await channel.assertQueue(DEAD_LETTER_QUEUE, { durable: true });
     await channel.bindQueue(DEAD_LETTER_QUEUE, DEAD_LETTER_EXCHANGE, "failed");
 
-    // Setup consumers for direct queues
     for (const queue of QUEUES) {
       await channel.assertQueue(queue, { durable: true });
       channel.consume(queue, async (msg) => {
@@ -456,7 +442,6 @@ async function startConsumer() {
         }
       });
 
-      // Update active consumer gauge
       activeConsumersGauge.inc({ queue });
     }
 
@@ -483,28 +468,25 @@ async function startConsumer() {
       }
     });
 
-    // Update active consumer gauge for the exchange
+    // active consumer gauge for the exchange
     activeConsumersGauge.inc({ queue: USER_EXCHANGE });
 
     console.log(`Consuming from exchange: ${USER_EXCHANGE}`);
 
-    // Handle connection errors
     conn.on("error", (err) => {
       console.error("RabbitMQ connection error:", err);
       rabbitmqConnectionCounter.inc({ status: "mq_error" });
-      // Decrement active consumers when connection fails
+
       QUEUES.forEach((queue) => {
         activeConsumersGauge.dec({ queue });
       });
       activeConsumersGauge.dec({ queue: USER_EXCHANGE });
     });
 
-    // Handle channel errors
     channel.on("error", (err) => {
       console.error("RabbitMQ channel error:", err);
     });
 
-    // Set up periodic queue monitoring
     setInterval(() => checkQueueStats(channel), 30000); // Check every 30 seconds
 
     return { conn, channel };

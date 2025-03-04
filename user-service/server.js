@@ -621,7 +621,7 @@ app.get("/health", (req, res) => {
   });
 });
 
-// ===================== START SERVER =====================
+// START SERVER
 const PORT = 3001;
 app.listen(PORT, async () => {
   console.log(`Server running at http://localhost:${PORT}`);
@@ -629,11 +629,9 @@ app.listen(PORT, async () => {
   await setupRabbitMQ();
 });
 
-// Graceful shutdown handling
 const shutdown = async () => {
   console.log("Shutting down gracefully...");
 
-  // Close RabbitMQ connection if it exists
   if (rabbitmqConnection) {
     try {
       await rabbitmqConnection.close();
@@ -646,6 +644,5 @@ const shutdown = async () => {
   process.exit(0);
 };
 
-// Listen for termination signals
 process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);

@@ -52,7 +52,7 @@ This is a user management service with authentication, RabbitMQ integration, and
    - `MONGODB_URI`
    - `RABBITMQ_URL`
    - `SECRET_KEY`
-3. Start the server: `node app.js`
+3. Start the server: `node server.js`
 
 ## Metrics
 

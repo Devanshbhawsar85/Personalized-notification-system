@@ -8,10 +8,8 @@ require("dotenv").config();
 const app = express();
 const PORT = 3003;
 
-// Create metric registry
 const register = new promClient.Registry();
 
-// Configure metrics middleware
 const metricsMiddleware = promBundle({
   includeMethod: true,
   includePath: true,
@@ -23,7 +21,7 @@ const metricsMiddleware = promBundle({
 app.use(metricsMiddleware);
 app.use(express.json());
 
-// Create custom metrics
+//  custom metrics
 const messagePublishCounter = new promClient.Counter({
   name: "recommendation_service_rabbitmq_messages_published_total",
   help: "Total number of messages published to RabbitMQ",
@@ -60,7 +58,7 @@ const operationsCounter = new promClient.Counter({
   registers: [register],
 });
 
-// New metrics for queue monitoring
+// metrics for queue monitoring
 const queueDepthGauge = new promClient.Gauge({
   name: "recommendation_service_rabbitmq_queue_depth",
   help: "Current number of messages in RabbitMQ queues",
@@ -112,15 +110,12 @@ const connectRabbitMQ = async () => {
     rabbitConnection = await amqp.connect(process.env.RABBITMQ_URL);
     const channel = await rabbitConnection.createChannel();
 
-    // Set up connection error handling
     rabbitConnection.on("error", handleRabbitMQError);
     channel.on("error", handleChannelError);
 
-    // Set up the recommendation queue
     const RECOMMEND_QUEUE = "recommendations";
     await channel.assertQueue(RECOMMEND_QUEUE, { durable: true });
 
-    // Set up to listen for user events
     const USER_EXCHANGE = "user-events";
     await channel.assertExchange(USER_EXCHANGE, "topic", { durable: true });
     const q = await channel.assertQueue("", { exclusive: true });
@@ -129,14 +124,13 @@ const connectRabbitMQ = async () => {
     await channel.bindQueue(q.queue, USER_EXCHANGE, "user.created");
     await channel.bindQueue(q.queue, USER_EXCHANGE, "user.preferences.updated");
 
-    // Process user events
     channel.consume(q.queue, async (msg) => {
       if (msg) {
         try {
           const routingKey = msg.fields.routingKey;
           const message = JSON.parse(msg.content.toString());
 
-          // Track message consumption
+          // Tracking message consumption
           messageConsumeCounter.inc({
             exchange: USER_EXCHANGE,
             routing_key: routingKey,
@@ -161,7 +155,7 @@ const connectRabbitMQ = async () => {
             queue: q.queue,
           });
 
-          // Add delivery failure handling - reject with requeue for retry
+          // delivery failure handling - reject with requeue for retry
           // but only if it hasn't been retried too many times
           const retryCount = msg.properties.headers?.retryCount || 0;
 
@@ -183,7 +177,6 @@ const connectRabbitMQ = async () => {
             console.log(`Message requeued for retry ${retryCount + 1}/3`);
           }
 
-          // Always ack the original message
           channel.ack(msg);
         }
       }
@@ -199,7 +192,6 @@ const connectRabbitMQ = async () => {
     console.error("RabbitMQ connection error:", err);
     rabbitmqConnectionCounter.inc({ status: "failure" });
 
-    // Try to reconnect after a delay
     setTimeout(async () => {
       console.log("Attempting to reconnect to RabbitMQ...");
       rabbitChannel = await connectRabbitMQ();
@@ -209,24 +201,20 @@ const connectRabbitMQ = async () => {
   }
 };
 
-// Handle RabbitMQ connection errors
 const handleRabbitMQError = async (error) => {
   console.error("RabbitMQ connection error:", error);
   messageErrorCounter.inc({ error_type: "connection", queue: "all" });
 
-  // Try to reconnect after a delay
   setTimeout(async () => {
     console.log("Attempting to reconnect to RabbitMQ...");
     rabbitChannel = await connectRabbitMQ();
   }, 5000);
 };
 
-// Handle channel errors
 const handleChannelError = async (error) => {
   console.error("RabbitMQ channel error:", error);
   messageErrorCounter.inc({ error_type: "channel", queue: "all" });
 
-  // Try to recreate the channel
   try {
     rabbitChannel = await rabbitConnection.createChannel();
   } catch (err) {
@@ -238,7 +226,6 @@ const handleChannelError = async (error) => {
 const setupQueueMonitoring = (channel) => {
   const queues = ["recommendations"];
 
-  // Check queue depths every 30 seconds
   setInterval(async () => {
     for (const queue of queues) {
       try {
@@ -262,7 +249,6 @@ const User = mongoose.model("User", userSchema);
 // Handle New User Event
 const handleNewUser = async (user) => {
   try {
-    // Create a new user in the recommendation database
     const newUser = new User({
       userId: user.id,
       purchaseHistory: [],
@@ -282,14 +268,12 @@ const handlePreferencesUpdate = async (data) => {
   try {
     const { userId, preferences } = data;
 
-    // Generate recommendations based on updated preferences
     const recommendations = await generateRecommendations(userId);
 
-    // Send recommendations to the notification service via RabbitMQ
+    MQ;
     if (recommendations.length > 0 && rabbitChannel) {
       const queue = "recommendations";
 
-      // Use the existing channel and make sure durable is true to match consumer
       for (const message of recommendations) {
         try {
           const result = rabbitChannel.sendToQueue(
@@ -303,10 +287,9 @@ const handlePreferencesUpdate = async (data) => {
                 },
               })
             ),
-            { persistent: true } // Make messages persistent
+            { persistent: true }
           );
 
-          // Check if message was published successfully
           if (result) {
             messagePublishCounter.inc({ queue });
           } else {

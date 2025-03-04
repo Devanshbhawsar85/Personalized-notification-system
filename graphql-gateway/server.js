@@ -20,7 +20,6 @@ const redisClient = redis.createClient({
   url: REDIS_URL,
 });
 
-// Redis connection setup
 (async () => {
   redisClient.on("error", (error) => console.error(`Redis Error: ${error}`));
   redisClient.on("connect", () => console.log("Redis connection success"));

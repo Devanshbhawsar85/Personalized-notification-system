@@ -34,4 +34,4 @@ This service generates recommendations for users based on their browsing and pur
 2. Set environment variables in `.env`:
    - `MONGODB_URI`
    - `RABBITMQ_URL`
-3. Start the server: `node app.js`
+3. Start the server: `node server.js`

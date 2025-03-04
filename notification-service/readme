@@ -35,4 +35,4 @@ This service handles notifications for users, consuming messages from RabbitMQ a
 2. Set environment variables in `.env`:
    - `MONGODB_URI`
    - `RABBITMQ_URL`
-3. Start the server: `node app.js`
+3. Start the server: `node server.js`
